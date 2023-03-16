@@ -66,19 +66,21 @@ class ChangePasswordForm(PasswordChangeForm):
 
 
 class CreateuserForm(forms.ModelForm):
+    username = forms.CharField(label="Username", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
     first_name = forms.CharField(label="First Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                  required=False)
 
     last_name = forms.CharField(label="Last Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                 required=False)
 
-    username = forms.CharField(label="Username", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
     email = forms.EmailField(label="Email", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
     address = forms.CharField(max_length=200, widget=forms.Textarea(attrs={
         'class': 'form-control',
         'rows': '3'
     }))
-    phone_number = PhoneNumberField(label="Phone number",region="DZ")
+    phone_number = PhoneNumberField(label="Phone number",region="DZ", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
+
+    feecharge = forms.DecimalField(label="Charge", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
 
     # username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
     # email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control'}))
@@ -86,4 +88,4 @@ class CreateuserForm(forms.ModelForm):
     
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email',"username", 'address', 'phone_number']
+        fields = ["username",'first_name', 'last_name', 'email', 'address', 'phone_number',"feecharge"]

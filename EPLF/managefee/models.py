@@ -36,7 +36,7 @@ class Subscription(models.Model):
     stripe_subscription_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return self.plan
+        return f"{self.plan } - {self.year}"
 
     def activate_subscription(self):
         self.is_active = True
@@ -61,4 +61,4 @@ class Fee(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
-        return f"{self.subscription.user.username} - {self.date} - {self.amount}"
+        return f"{self.subscription.user.username} - {self.subscription.year} - {self.date} - {self.amount}"
