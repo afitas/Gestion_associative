@@ -65,7 +65,7 @@ function get_total_amount(url, cid){
             'course_id': cid,
         }
     }).done(function(data) {
-        $('#id_total_fee').val(data.data);
+        $('#id_amount').val(data.data);
     }
     ).fail(function(data) {
         console.log(data);

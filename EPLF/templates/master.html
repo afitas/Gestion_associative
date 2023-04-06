@@ -21,12 +21,17 @@
 
     <!-- Custom styles for this template-->
     <link href="{% static "css/sb-admin-2.min.css" %}" rel="stylesheet">
+    {# Include Bootstrap 4 and jQuery #}
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    {# Django Tempus Dominus assets are included in `{{ form.media }}` #}
+    {{ form.media }}
 
     {% block style %} {% endblock %}
 
 </head>
 
-<body id="page-top">
+<body id="page-top" hx-boost="true" hx-ext="multi-swap">
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -71,7 +76,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Users:</h6>
                         <a class="collapse-item" href="{% url 'users.list' %}">Users's List</a>
-                        <a class="collapse-item" href="">Enrolls</a>
+                        <a class="collapse-item" href="{% url 'enroll.index' %}">Enrolls</a>
                     </div>
                 </div>
             </li>
