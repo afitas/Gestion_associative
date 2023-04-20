@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
-
+from .models import Subscription, CustomUser, Fee
 from . import views
 
 urlpatterns = [
@@ -9,6 +9,8 @@ urlpatterns = [
     path('get_course_total_amount/', login_required(views.get_course_total_amount),
          name="enroll.get_course_total_amount"),
     path('store/', login_required(views.store), name="enroll.store"),
+    path('sub/', login_required(views.sub), name="enroll.sub"),
+    path('subscription_amount/<int:user_id>/', login_required(views.subscription_amount), name="enroll.subscription_amount"),
     path('edit/<int:eid>', login_required(views.edit), name="enroll.edit"),
     path('update/<int:eid>', login_required(views.update), name="enroll.update"),
     path('delete/<int:eid>', login_required(views.delete), name="enroll.delete"),

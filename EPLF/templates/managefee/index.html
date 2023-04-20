@@ -35,22 +35,20 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Course</th>
                                 <th>Name</th>
-                                <th>Payable Fee</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
+                                <th>SUB</th>
+                                <th>DATE</th>
+                                <th>amount</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tfoot>
                             <tr>
                                 <th>#</th>
-                                <th>Course</th>
                                 <th>Name</th>
-                                <th>Payable Fee</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
+                                <th>SUB</th>
+                                <th>DATE</th>
+                                <th>amount</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </tfoot>
@@ -58,11 +56,10 @@
                             {% for enroll in enrolls %}
                                 <tr>
                                     <td>{{ enroll.id }}</td>
-                                    <td>{{ enroll.course_id }}</td>
-                                    <td>{{ enroll.student_id }}</td>
-                                    <td>${{ enroll.total_fee }}</td>
-                                    <td>${{ enroll.paid }}</td>
-                                    <td>${{ enroll.balance }}</td>
+                                    <td>{{ enroll.user }}</td>
+                                    <td>{{ enroll.subscription }}</td>
+                                    <td>{{ enroll.date }}</td>
+                                    <td>{{ enroll.amount }} DA</td>
                                     <td class="text-center">
                                         {% if enroll.last_payment.id %}
                                             <a href="{% url 'payment.invoice' pid=enroll.last_payment.id %}" class="d-none d-sm-inline-block btn btn-sm btn-success">

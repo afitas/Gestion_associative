@@ -61,4 +61,4 @@ class Fee(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
-        return f"{self.subscription.user.username} - {self.subscription.year} - {self.date} - {self.amount}"
+        return f"{self.user.username} - {self.subscription.plan} - {self.subscription.year} - {self.date} - {self.amount}"

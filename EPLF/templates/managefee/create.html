@@ -1,5 +1,7 @@
 {% extends 'master.html' %}
 {% load static %}
+<script src="{% static 'js/htmx.min.js' %}" defer></script>
+{% load widget_tweaks %}
 
 {% block style %}
     <link href="{% static 'vendor/select2/select2.min.css' %}" rel="stylesheet" />
@@ -44,7 +46,7 @@
                                 {{ non_field_error }}
                             </div>
                         {% endfor %}
-                        {% for fields in form %}
+                        <!-- {% for fields in form %}
                             <div class="form-group">
                                 <label for="{{ fields.id_for_label }}" class="text-capitalize">{{ fields.label }}</label>
                                 {{ fields }}
@@ -54,7 +56,19 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                        {% endfor %}
+                        {% endfor %} -->            
+                        {{ form.user.label_tag }}
+                        {% render_field form.user class='custom-select mb-4' autocomplete="off" hx-get="/managefee/sub/" hx-target="#id_subscription" %}
+
+
+                        {{ form.subscription.label_tag }}
+                        {% render_field form.subscription class='custom-select mb-4' %}
+
+                        {{ form.date.label_tag }}
+                        {% render_field form.date class='custom-select mb-4' %}
+
+                        {{ form.amount.label_tag }}
+                        {% render_field form.amount|append_attr:"readonly:readonly" type="text" placeholder="Charge"  class='custom-select mb-4' %}
                     </form>
                 </div>
             </div>
@@ -63,7 +77,8 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
+    
+    {% comment %} <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script>
         $(function () {
@@ -74,11 +89,63 @@
                 });
             });
 
-            $('#id_course_id').on('change', function () {
-                let course_id = $(this).val();
-                get_total_amount("{% url 'enroll.get_course_total_amount' %}", course_id);
-                console.log(course_id)
+            $('#id_user').on('change', function () {
+                let user = $(this).val();
+                get_total_amount("{% url 'enroll.get_course_total_amount' %}", user);
+                console.log(user)
             });
         });
+    </script> {% endcomment %}
+    {% comment %} <script>
+        const userSelect = document.getElementById('id_user');
+        console.log(userSelect);
+        const amountInput = document.getElementById('id_amount');
+        console.log(amountInput);
+        const endpointUrl = "{% url 'enroll.subscription_amount' %}";
+
+        userSelect.addEventListener('change', () => {
+            const userId = userSelect.value;
+            const url = endpointUrl.replace('0', userId);
+            fetch(url)
+            .then(response => response.json())
+            .then(feecharge => {
+                const amount = feecharge['feecharge'];
+                console.log(amount);
+                amountInput.value = amount;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+    </script> {% endcomment %}
+
+    <script>
+        function getSelectValue(selectId){
+        /**On récupère l'élement html <select>*/
+        var selectElmt = document.getElementById(selectId);
+        /**
+        selectElmt.options correspond au tableau des balises <option> du select
+        selectElmt.selectedIndex correspond à l'index du tableau options qui est actuellement sélectionné
+        */
+        return selectElmt.options[selectElmt.selectedIndex].value;
+}
+        const userSelect = document.getElementById('id_user');
+        userSelect.addEventListener('change', () => {
+        var selectValue = getSelectValue('id_user');
+        console.log(selectValue)
+        let csrfTokenValue = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const url = "{% url 'enroll.subscription_amount' 0 %}".replace("0", selectValue);
+
+        const request = new Request(url);
+        console.log(request);
+        fetch(request)
+            .then(response => response.json())
+            .then(feecharge => {
+                console.log(feecharge);
+                document.getElementById("id_amount").value = feecharge.feecharge;
+            })
+})
+
     </script>
 {% endblock %}
