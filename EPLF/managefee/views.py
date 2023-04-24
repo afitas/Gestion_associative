@@ -2,19 +2,47 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from .models import Subscription, CustomUser, Fee
-from managefee.forms import CreateEnrollForm
+from managefee.forms import CreateEnrollForm, CreatePlanSubForm
 
 # Create your views here.
 
 
-def index(request):
+# def index(request):
+#     enrolls = Fee.objects.all()
+#     return render(request, 'managefee/index.html', {'enrolls': enrolls})
+
+def subscriptions_list(request):
     enrolls = Fee.objects.all()
-    return render(request, 'managefee/index.html', {'enrolls': enrolls})
+    return render(request, 'managefee/subscriptions_list.html', {'enrolls': enrolls})
+
+def plan_list(request):
+    allSubscription = Subscription.objects.all()
+    return render(request, 'managefee/plan_list.html', {'allSubscription': allSubscription})
 
 
 def create(request):
     form = CreateEnrollForm()
     return render(request, 'managefee/create.html', {'form': form})
+
+def plan_create(request):
+    form = CreatePlanSubForm()
+    return render(request, 'managefee/plan_create.html', {'form': form})
+
+def plan_store(request):
+    if request.method == 'POST':
+        form = CreatePlanSubForm(request.POST or None)
+        
+        if form.is_valid():
+            # print("tesssssssssst")
+            # print(form)
+            form.save()
+            messages.success(request, 'Ce plan à bien étais enregistrer')
+            return redirect('subscription.plan_list')
+        else:
+            return render(request, 'managefee/plan_create.html', {'form': form})
+    else:
+        return redirect('subscription.plan_list')
+
 
 
 def get_course_total_amount(request):
@@ -58,11 +86,11 @@ def store(request):
             # print(form)
             form.save()
             messages.success(request, 'Charge for user successfully store')
-            return redirect('enroll.index')
+            return redirect('enroll.subscriptions_list')
         else:
             return render(request, 'managefee/create.html', {'form': form})
     else:
-        return redirect('enroll.index')
+        return redirect('enroll.subscriptions_list')
 
 
 def edit(request, eid):
@@ -71,7 +99,7 @@ def edit(request, eid):
         form = CreateEnrollForm(instance=enroll)
         return render(request, 'managefee/edit.html', {'form': form, 'enroll': enroll})
     except Fee.DoesNotExist:
-        return redirect('enroll.index')
+        return redirect('enroll.subscriptions_list')
 
 
 def update(request, eid):
@@ -82,13 +110,13 @@ def update(request, eid):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'info for user successfully updated ')
-                return redirect('enroll.index')
+                return redirect('enroll.subscriptions_list')
             else:
                 return render(request, 'managefee/edit.html', {'form': form, 'enroll': enroll})
         else:
-            return redirect('enroll.index')
+            return redirect('enroll.subscriptions_list')
     except Fee.DoesNotExist:
-        return redirect('enroll.index')
+        return redirect('enroll.subscriptions_list')
 
 
 def delete(request, eid):
@@ -96,11 +124,11 @@ def delete(request, eid):
         try:
             enroll = Fee.objects.get(id=eid)
             enroll.delete()
-            return redirect('enroll.index')
+            return redirect('enroll.subscriptions_list')
         except Fee.DoesNotExist:
             messages.error(request, 'Enrolled info not found')
-            return redirect('enroll.index')
+            return redirect('enroll.subscriptions_list')
     else:
         messages.error(request, 'Invalid request')
-        return redirect('enroll.index')
+        return redirect('enroll.subscriptions_list')
 

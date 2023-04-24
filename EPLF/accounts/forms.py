@@ -66,11 +66,11 @@ class ChangePasswordForm(PasswordChangeForm):
 
 
 class CreateuserForm(forms.ModelForm):
-    username = forms.CharField(label="Username", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
-    first_name = forms.CharField(label="First Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
+    username = forms.CharField(label="Nom d'utilisateur", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
+    first_name = forms.CharField(label="Prénom", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                  required=False)
 
-    last_name = forms.CharField(label="Last Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
+    last_name = forms.CharField(label="Nom", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                 required=False)
 
     email = forms.EmailField(label="Email", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
@@ -78,14 +78,10 @@ class CreateuserForm(forms.ModelForm):
         'class': 'form-control',
         'rows': '3'
     }))
-    phone_number = PhoneNumberField(label="Phone number",region="DZ", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
+    phone_number = PhoneNumberField(region="DZ", widget=TextInput(attrs={'class': 'form-control form-control-user'}), label="Numéro de Téléphone")
 
     feecharge = forms.DecimalField(label="Charge", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
 
-    # username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    # email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    # contact = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    
     class Meta:
         model = CustomUser
         fields = ["username",'first_name', 'last_name', 'email', 'address', 'phone_number',"feecharge"]
