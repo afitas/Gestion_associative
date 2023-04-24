@@ -15,14 +15,14 @@
             <span class="icon text-white-50">
                 <i class="fas fa-arrow-circle-left"></i>
             </span>
-            <span class="text">Annuler</span>
+            <span class="text">Cancel</span>
         </a>
 
         <a href="javascript:void(0)" onclick="$('#enroll-form').submit()" class="btn btn-primary btn-icon-split btn-sm">
             <span class="icon text-white-50">
                 <i class="fas fa-save"></i>
             </span>
-            <span class="text">Payer</span>
+            <span class="text">Insert</span>
         </a>
     </div>
 {% endblock %}
@@ -35,18 +35,18 @@
                 <!-- Card Header - Dropdown -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary text-uppercase">Ajout d'un Abonnement</h6>
+                    <h6 class="m-0 font-weight-bold text-primary text-uppercase">Creation d'un Plan</h6>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                    <form action="{% url 'enroll.store' %}" method="post" id="enroll-form">
+                    <form action="{% url 'subscription.store' %}" method="post" id="enroll-form">
                         {% csrf_token %}
                         {% for non_field_error in form.non_field_errors %}
                             <div class="invalid-feedback d-block">
                                 {{ non_field_error }}
                             </div>
                         {% endfor %}
-                        <!-- {% for fields in form %}
+                        {% for fields in form %}
                             <div class="form-group">
                                 <label for="{{ fields.id_for_label }}" class="text-capitalize">{{ fields.label }}</label>
                                 {{ fields }}
@@ -56,19 +56,8 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                        {% endfor %} -->            
-                        {{ form.user.label_tag }}
-                        {% render_field form.user class='custom-select mb-4' autocomplete="off" hx-get="/managefee/sub/" hx-target="#id_subscription" %}
-
-
-                        {{ form.subscription.label_tag }}
-                        {% render_field form.subscription class='custom-select mb-4' %}
-
-                        {{ form.date.label_tag }}
-                        {% render_field form.date class='custom-select mb-4' %}
-
-                        {{ form.amount.label_tag }}
-                        {% render_field form.amount|append_attr:"readonly:readonly" type="text" placeholder="Charge"  class='custom-select mb-4' %}
+                        {% endfor %}      
+                  
                     </form>
                 </div>
             </div>
@@ -119,33 +108,33 @@
         });
     </script> {% endcomment %}
 
-    <script>
-        function getSelectValue(selectId){
-        /**On récupère l'élement html <select>*/
-        var selectElmt = document.getElementById(selectId);
-        /**
-        selectElmt.options correspond au tableau des balises <option> du select
-        selectElmt.selectedIndex correspond à l'index du tableau options qui est actuellement sélectionné
-        */
-        return selectElmt.options[selectElmt.selectedIndex].value;
-}
-        const userSelect = document.getElementById('id_user');
-        userSelect.addEventListener('change', () => {
-        var selectValue = getSelectValue('id_user');
-        console.log(selectValue)
-        let csrfTokenValue = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        {% comment %} <script>
+            function getSelectValue(selectId){
+            /**On récupère l'élement html <select>*/
+            var selectElmt = document.getElementById(selectId);
+            /**
+            selectElmt.options correspond au tableau des balises <option> du select
+            selectElmt.selectedIndex correspond à l'index du tableau options qui est actuellement sélectionné
+            */
+            return selectElmt.options[selectElmt.selectedIndex].value;
+    }
+            const userSelect = document.getElementById('id_user');
+            userSelect.addEventListener('change', () => {
+            var selectValue = getSelectValue('id_user');
+            console.log(selectValue)
+            let csrfTokenValue = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        const url = "{% url 'enroll.subscription_amount' 0 %}".replace("0", selectValue);
+            const url = "{% url 'enroll.subscription_amount' 0 %}".replace("0", selectValue);
 
-        const request = new Request(url);
-        console.log(request);
-        fetch(request)
-            .then(response => response.json())
-            .then(feecharge => {
-                console.log(feecharge);
-                document.getElementById("id_amount").value = feecharge.feecharge;
-            })
-})
+            const request = new Request(url);
+            console.log(request);
+            fetch(request)
+                .then(response => response.json())
+                .then(feecharge => {
+                    console.log(feecharge);
+                    document.getElementById("id_amount").value = feecharge.feecharge;
+                })
+    })
 
-    </script>
+        </script> {% endcomment %}
 {% endblock %}

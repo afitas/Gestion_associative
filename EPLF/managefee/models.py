@@ -2,7 +2,7 @@
 import datetime
 from django.db import models
 from accounts.models import CustomUser
-import datetime
+
 
 
 class Subscription(models.Model):
@@ -27,32 +27,13 @@ class Subscription(models.Model):
         ("DECEMBRE", "decembre"),
     )
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES)
     year = models.IntegerField(choices=YEAR_CHOICES, default=datetime.datetime.now().year)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    is_active = models.BooleanField(default=False)
-    stripe_subscription_id = models.CharField(max_length=100, null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.plan } - {self.year}"
 
-    def activate_subscription(self):
-        self.is_active = True
-        self.end_date = self.start_date.replace(month=self.start_date.month + 11, day=31)
-        self.save()
-
-    def deactivate_subscription(self):
-        self.is_active = False
-        self.end_date = self.start_date.replace(month=self.start_date.month - 1, day=31)
-        self.save()
-
-    def get_next_billing_date(self):
-        next_billing_date = self.start_date.replace(day=1)
-        if self.is_active:
-            next_billing_date = self.end_date.replace(day=1) + datetime.timedelta(days=1)
-        return next_billing_date
 
 class Fee(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
