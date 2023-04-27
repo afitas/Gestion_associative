@@ -15,7 +15,7 @@
             <span class="icon text-white-50">
                 <i class="fas fa-plus-circle"></i>
             </span>
-            <span class="text">Create Plan</span>
+            <span class="text">Créer un plan</span>
         </a>
     </div>
     {% include 'messages.html' %}
@@ -66,9 +66,12 @@
 {% block script %}
     <script src="{% static "vendor/datatables/jquery.dataTables.min.js" %}"></script>
     <script src="{% static "vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
-    <script src="{% static "js/demo/datatables-demo.js" %}"></script>
     <script>
         $('#dataTable').dataTable( {
+          "columnDefs": [
+            { "width": "20%", "targets": 1 }
+          ], 
+          "pageLength": 8,
           "order": [[ 0, "asc" ]]
         });
     </script>

@@ -1,0 +1,13 @@
+[Unit]
+Description=CGN Gunicorne Core service
+After=network.target
+
+[Service]
+Type=simple
+User=admincgn
+Restart=always
+RestartSec=5
+ExecStart=/home/admincgn/securiteroutiere_CGN/cgn/deploy/start_gunicorn_server.bash
+
+[Install]
+WantedBy=multi-user.target
