@@ -1,16 +1,19 @@
 from django.shortcuts import render
 from accounts.models import CustomUser
-from managefee.models import Fee
+from managefee.models import Fee, Subscription
 
 
 def index(request):
     allusers  = CustomUser.objects.all().count()
-    listusers = CustomUser.objects.all().order_by('-username')
+    listusers = CustomUser.objects.exclude(is_superuser=True)
     listfee  = Fee.objects.prefetch_related('subscription').all()
-    print(listfee[0].__dict__)
+    listsub = Subscription.objects.all
+    # print(listfee[0].__dict__)
     return render(request, 'index.html', {
         'allusers': allusers,
         'listusers': listusers,
         'listfee': listfee,
+        'listsub': listsub,
+
     }
 )

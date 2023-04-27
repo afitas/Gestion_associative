@@ -76,7 +76,7 @@ def password_change(request):
         return render(request, 'account/profile.password.html', {'form': form})
 
 def list(request):
-    listusers = models.CustomUser.objects.all()
+    listusers = models.CustomUser.objects.exclude(is_superuser=True)
     return render(request, 'account/list.html', {'listusers': listusers})
 
 def create(request):

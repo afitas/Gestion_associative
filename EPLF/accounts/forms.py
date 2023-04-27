@@ -25,19 +25,19 @@ class CustomUserChangeForm(UserChangeForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=TextInput(attrs={'class': 'form-control form-control-user',
-                                                       'placeholder': 'Enter username...'}))
+                                                       'placeholder': 'Saisissez votre nom d''utilisateur...'}))
     password = forms.CharField(widget=PasswordInput(attrs={'class': 'form-control form-control-user',
-                                                           'placeholder': 'Password'}))
+                                                           'placeholder': 'Saisissez le mot de passe'}))
 
 
 class EditProfileForm(UserChangeForm):
-    first_name = forms.CharField(label="First Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
+    first_name = forms.CharField(label="Prénom", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                  required=False)
 
-    last_name = forms.CharField(label="Last Name", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
+    last_name = forms.CharField(label="Nom", widget=TextInput(attrs={'class': 'form-control form-control-user'}),
                                 required=False)
 
-    username = forms.CharField(label="Username", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
+    username = forms.CharField(label="Nom d'utilisateur", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
     email = forms.EmailField(label="Email", widget=TextInput(attrs={'class': 'form-control form-control-user'}))
 
     password = None
@@ -46,7 +46,7 @@ class EditProfileForm(UserChangeForm):
         email = self.cleaned_data.get('email')
         if email:
             if User.objects.filter(email=email).exclude(id=self.instance.id).exists():
-                raise forms.ValidationError('Email already exists')
+                raise forms.ValidationError('l''email existe déjà')
         return email
 
     class Meta:
@@ -55,13 +55,13 @@ class EditProfileForm(UserChangeForm):
 
 
 class ChangePasswordForm(PasswordChangeForm):
-    old_password = forms.CharField(label="Old Password",
+    old_password = forms.CharField(label="ancien mot de passe",
                                    widget=PasswordInput(attrs={'class': 'form-control form-control-user'}))
 
-    new_password1 = forms.CharField(label="New Password",
+    new_password1 = forms.CharField(label="nouveau mot de passe",
                                     widget=PasswordInput(attrs={'class': 'form-control form-control-user'}))
 
-    new_password2 = forms.CharField(label="Confirm Password",
+    new_password2 = forms.CharField(label="Confirmez le mot de passe",
                                     widget=PasswordInput(attrs={'class': 'form-control form-control-user'}))
 
 

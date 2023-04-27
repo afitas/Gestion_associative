@@ -15,7 +15,7 @@
             <span class="icon text-white-50">
                 <i class="fas fa-plus-circle"></i>
             </span>
-            <span class="text">Create</span>
+            <span class="text">Créer</span>
         </a>
     </div>
     {% include 'messages.html' %}
@@ -26,7 +26,7 @@
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Liste des abonnements des locataires</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Liste des paiements des abonnes</h6>
                 </div>
 
                 <div class="card-body">
@@ -35,21 +35,21 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Name</th>
-                                <th>SUB</th>
-                                <th>DATE</th>
-                                <th>amount</th>
-                                <th class="text-center">Action</th>
+                                <th>Nom d'utilisateur</th>
+                                <th>Abonnement</th>
+                                <th>Date de paiment</th>
+                                <th>Montant</th>
+                                {% comment %} <th class="text-center">Action</th> {% endcomment %}
                             </tr>
                         </thead>
                         <tfoot>
                             <tr>
                                 <th>#</th>
-                                <th>Name</th>
-                                <th>SUB</th>
-                                <th>DATE</th>
-                                <th>amount</th>
-                                <th class="text-center">Action</th>
+                                <th>Nom d'utilisateur</th>
+                                <th>Abonnement</th>
+                                <th>Date de paiment</th>
+                                <th>Montant</th>
+                                {% comment %} <th class="text-center">Action</th> {% endcomment %}
                             </tr>
                         </tfoot>
                         <tbody>
@@ -60,7 +60,7 @@
                                     <td>{{ enroll.subscription }}</td>
                                     <td>{{ enroll.date }}</td>
                                     <td>{{ enroll.amount }} DA</td>
-                                    <td class="text-center">
+                                    {% comment %} <td class="text-center">
                                         {% if enroll.last_payment.id %}
                                             <a href="{% url 'payment.invoice' pid=enroll.last_payment.id %}" class="d-none d-sm-inline-block btn btn-sm btn-success">
                                                 <i class="fas fa-file-invoice fa-fw fa-sm text-white-50"></i>
@@ -71,7 +71,7 @@
                                         </a>
                                         <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-danger" data-toggle="modal" data-target="#delete-{{ enroll.id }}">
                                         <i class="fas fa-trash fa-sm text-white-50"></i>
-                                    </button>
+                                        </button>
                                         <div class="modal fade" id="delete-{{ enroll.id }}" tabindex="-1" role="dialog">
                                           <div class="modal-dialog" role="document">
                                             <div class="modal-content">
@@ -95,7 +95,7 @@
                                             </div>
                                           </div>
                                         </div>
-                                    </td>
+                                    </td> {% endcomment %}
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -110,9 +110,11 @@
 {% block script %}
     <script src="{% static "vendor/datatables/jquery.dataTables.min.js" %}"></script>
     <script src="{% static "vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
-    <script src="{% static "js/demo/datatables-demo.js" %}"></script>
     <script>
         $('#dataTable').dataTable( {
+          "columnDefs": [
+            { "width": "20%", "targets": 1 }
+          ],
           "order": [[ 0, "desc" ]]
         });
     </script>
