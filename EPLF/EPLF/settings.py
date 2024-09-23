@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-2!k@$m(c=sny%37#mz$-g*^)^h%_5(tusgc9%0bd8*32a9nu(1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["gestioneplf.duckdns.org"]
+ALLOWED_HOSTS = ['gestioneplf.duckdns.org', '129.151.246.96']
 
 env("ALLOWED_HOSTS").split()
 
