@@ -31,9 +31,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2!k@$m(c=sny%37#mz$-g*^)^h%_5(tusgc9%0bd8*32a9nu(1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['gestioneplf.duckdns.org', '129.151.246.96']
+ALLOWED_HOSTS = ['gestioneplf.duckdns.org', '129.151.246.96', "127.0.0.1",  # Pour les tests locaux
+    "localhost", ]
 
 env("ALLOWED_HOSTS").split()
 
@@ -93,7 +94,7 @@ WSGI_APPLICATION = 'EPLF.wsgi.application'
 
 DATABASES = {
       "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": env("DB_NAME"),
         "USER": env("DB_USER"),
         "PASSWORD": env("DB_PASSWORD"),

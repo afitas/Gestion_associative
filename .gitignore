@@ -4,13 +4,13 @@
 *.pyc
 __pycache__
 media
-
+EPLF/staticfiles/
+staticfiles/
 # Environments 
 .env 
 **.venv
 # mkdocs documentation 
-/site 
-cgn/staticfiles/*
+
 
 # Visual Studio Code # 
 **.vscode**
@@ -19,4 +19,3 @@ cgn/staticfiles/*
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
-cgn/road_events/sync_folder/*.csv
