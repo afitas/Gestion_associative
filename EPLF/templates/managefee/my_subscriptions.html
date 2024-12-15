@@ -1,0 +1,76 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Mes Mensualités</h1>
+    <p class="mb-4">Consultez l'historique de vos mensualités par année.</p>
+
+    <!-- Total Amount Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Montant Total Payé</h6>
+        </div>
+        <div class="card-body">
+            <h4 class="text-center">{{ total_amount }} €</h4>
+        </div>
+    </div>
+
+    {% for year, fees in fees_by_year.items %}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Année {{ year }}</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mois</th>
+                            <th>Date de Paiement</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fee in fees %}
+                        <tr>
+                            <td>{{ fee.subscription.plan }}</td>
+                            <td>{{ fee.date }}</td>
+                            <td>{{ fee.amount }} €</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Section pour les abonnements non payés -->
+    <h2 class="h4 mb-2 text-gray-800">Abonnements Non Payés</h2>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Abonnements Non Payés</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Plan</th>
+                            <th>Année</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subscription in unpaid_subscriptions %}
+                        <tr>
+                            <td>{{ subscription.plan }}</td>
+                            <td>{{ subscription.year }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

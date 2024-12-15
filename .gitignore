@@ -4,8 +4,7 @@
 *.pyc
 __pycache__
 media
-EPLF/staticfiles/
-staticfiles/
+EPLF/staticfiles/*
 # Environments 
 .env 
 **.venv

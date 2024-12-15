@@ -1,0 +1,324 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <!-- Titre de la page -->
+    <h1 class="h3 mb-4 text-gray-800">Dashboard des Abonnements</h1>
+
+    <!-- Filtre par année -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Sélectionner l'année</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <select name="year" class="form-control mr-2" onchange="this.form.submit()">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistiques Cards -->
+<div class="row mb-4">
+    <!-- Total des Paiements -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total des Paiements</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_payments_all }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Montant Total -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Montant Total</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_amount_all }} DA</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moyenne des Paiements -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Moyenne des Paiements</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ avg_payment|floatformat:2 }} DA</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Grille des mois -->
+    <div class="row" id="months-grid">
+        {% for month in months_data %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 month-card" data-month="{{ month.code }}">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month.name|title }}</div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Abonnements {{ selected_year }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="text-xs font-weight-bold text-success mb-1">Abonnés payés</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month.paid_subscribers }}</div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="text-xs font-weight-bold text-danger mb-1">Abonnés non payés</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month.unpaid_subscribers }}</div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="text-xs font-weight-bold text-info mb-1">Total collecté</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month.total_paid }} DA</div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ month.payment_percentage }}%"
+                                     aria-valuenow="{{ month.payment_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ month.payment_percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal pour les détails -->
+    <div class="modal fade" id="monthDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails du mois</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="monthDetailsContent">
+                    <!-- Le contenu sera chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.month-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const month = this.dataset.month;
+        const year = {{ selected_year }};
+        
+        // Afficher le modal
+        $('#monthDetailsModal').modal('show');
+        
+        // Charger les détails du mois
+        fetch(`/managefee/month-details/${month}/${year}/`)
+            .then(response => response.json())
+            .then(data => {
+                const content = document.getElementById('monthDetailsContent');
+                // Mettre à jour le contenu du modal avec les données
+                content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-left-success mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-success">Abonnés ayant payé (${data.total_paid})</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Utilisateur</th>
+                                                    <th>Date de paiement</th>
+                                                    <th>Montant</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${data.paid_users.map(user => `
+                                                    <tr>
+                                                        <td>${user.user}</td>
+                                                        <td>${user.date}</td>
+                                                        <td>${user.amount} DA</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-left-danger mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-danger">Abonnés n'ayant pas payé (${data.total_unpaid})</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Utilisateur</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${data.unpaid_users.map(user => `
+                                                    <tr>
+                                                        <td>${user.user}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+    });
+});
+</script>
+
+<script>
+    // Fonction pour initialiser DataTables
+    function initializeDataTable(tableId, data, columns) {
+        return $(`#${tableId}`).DataTable({
+            data: data,
+            columns: columns,
+            pageLength: 10,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/fr-FR.json'
+            },
+            dom: '<"top"f>rt<"bottom"ip>',
+            ordering: true,
+            searching: true
+        });
+    }
+    
+    document.querySelectorAll('.month-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const month = this.dataset.month;
+            const year = {{ selected_year }};
+            
+            // Afficher le modal
+            $('#monthDetailsModal').modal('show');
+            
+            // Charger les détails du mois
+            fetch(`/managefee/month-details/${month}/${year}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = document.getElementById('monthDetailsContent');
+                    content.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-left-success mb-4">
+                                    <div class="card-header py-3">
+                                        <h6 class="m-0 font-weight-bold text-success">Abonnés ayant payé (${data.total_paid})</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive" style="max-height: 400px;">
+                                            <table id="paidTable" class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Utilisateur</th>
+                                                        <th>Date de paiement</th>
+                                                        <th>Montant</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-left-danger mb-4">
+                                    <div class="card-header py-3">
+                                        <h6 class="m-0 font-weight-bold text-danger">Abonnés n'ayant pas payé (${data.total_unpaid})</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive" style="max-height: 400px;">
+                                            <table id="unpaidTable" class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Utilisateur</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+    
+                    // Initialiser les DataTables
+                    const paidColumns = [
+                        { data: 'user' },
+                        { data: 'date' },
+                        { 
+                            data: 'amount',
+                            render: function(data) {
+                                return data + ' DA';
+                            }
+                        }
+                    ];
+                    
+                    const unpaidColumns = [
+                        { data: 'user' }
+                    ];
+    
+                    // Initialiser les tables avec pagination
+                    initializeDataTable('paidTable', data.paid_users, paidColumns);
+                    initializeDataTable('unpaidTable', data.unpaid_users, unpaidColumns);
+                });
+        });
+    });
+    </script>
+
+{% endblock %}
+{% endblock %}

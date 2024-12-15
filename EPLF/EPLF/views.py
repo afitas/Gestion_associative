@@ -1,19 +1,13 @@
-from django.shortcuts import render
 from accounts.models import CustomUser
-from managefee.models import Fee, Subscription
+from django.shortcuts import render, redirect
 
 
 def index(request):
-    allusers  = CustomUser.objects.all().count()
-    listusers = CustomUser.objects.exclude(is_superuser=True)
-    listfee  = Fee.objects.prefetch_related('subscription').all()
-    listsub = Subscription.objects.all
-    # print(listfee[0].__dict__)
-    return render(request, 'index.html', {
-        'allusers': allusers,
-        'listusers': listusers,
-        'listfee': listfee,
-        'listsub': listsub,
-
-    }
-)
+    # Redirection selon le rôle
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('admin_dashboard')
+        else:
+            return redirect('tenant_dashboard')
+    
+    return redirect('account.login')

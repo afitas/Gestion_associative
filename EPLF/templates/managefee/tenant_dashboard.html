@@ -1,0 +1,51 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Tableau de Bord du Locataire</h1>
+
+    <div class="row">
+        <!-- Graphique des paiements par mois -->
+        <div class="col-xl-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Paiements par Mois</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="paymentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('paymentsChart').getContext('2d');
+        const monthlyData = {{ monthly_data|safe }};
+        const labels = Object.keys(monthlyData);
+        const data = Object.values(monthlyData);
+
+        const paymentsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total des Paiements (DA)',
+                    data: data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</div>
+{% endblock %}

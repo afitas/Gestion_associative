@@ -149,7 +149,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "accounts.CustomUser"  # new
 
 LOGIN_URL = '/accounts/'
-LOGOUT_REDIRECT_URL = "/accounts/"
+# LOGOUT_REDIRECT_URL = "/accounts/"
+LOGIN_REDIRECT_URL = '/managefee/dashboard/'  # Redirection après connexion
 
 INSTALLED_IPS = [
     '127.0.0.1'

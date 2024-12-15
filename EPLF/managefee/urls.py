@@ -18,4 +18,8 @@ urlpatterns = [
     path('subscriptions_list/edit/<int:eid>', login_required(views.edit), name="enroll.edit"),
     path('subscriptions_list/update/<int:eid>', login_required(views.update), name="enroll.update"),
     path('subscriptions_list/delete/<int:eid>', login_required(views.delete), name="enroll.delete"),
+    path('mysubscriptions/', views.my_subscriptions, name='my_subscriptions'),
+    path('dashboard/', login_required(views.tenant_dashboard), name='tenant_dashboard'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('month-details/<str:month>/<int:year>/', login_required(views.month_details), name='month_details'),
 ]

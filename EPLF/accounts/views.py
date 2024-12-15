@@ -17,6 +17,26 @@ from . import forms
 #     success_url = reverse_lazy("login")
 #     template_name = "registration/signup.html"
 
+# def login_view(request):
+#     if request.method == 'POST':
+#         form = LoginForm(request, request.POST)
+#         if form.is_valid():
+#             user = form.get_user()
+#             login(request, user)
+
+#             if 'remember' not in request.POST:
+#                 request.session.set_expiry(0)
+
+#             if 'next' in request.POST:
+#                 return redirect(request.POST['next'])
+#             else:
+#                 return redirect('index')
+#         else:
+#             return render(request, 'account/login.html', {'form': form})
+#     else:
+#         form = LoginForm()
+#         return render(request, 'account/login.html', {'form': form})
+
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request, request.POST)
@@ -27,15 +47,15 @@ def login_view(request):
             if 'remember' not in request.POST:
                 request.session.set_expiry(0)
 
-            if 'next' in request.POST:
-                return redirect(request.POST['next'])
+            # Redirection selon le rôle
+            if user.is_superuser:
+                return redirect('admin_dashboard')
             else:
-                return redirect('index')
-        else:
-            return render(request, 'account/login.html', {'form': form})
+                return redirect('tenant_dashboard')
     else:
         form = LoginForm()
-        return render(request, 'account/login.html', {'form': form})
+    
+    return render(request, 'account/login.html', {'form': form})
 
 
 def logout_view(request):
