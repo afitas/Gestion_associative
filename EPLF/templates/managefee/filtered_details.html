@@ -1,0 +1,195 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Titre de la page -->
+    <h1 class="h3 mb-4 text-gray-800">Détails des Paiements</h1>
+
+    <!-- Formulaire de filtrage -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline mb-3">
+                <!-- Sélection de l'année -->
+                <div class="form-group mx-2">
+                    <label class="mr-2">Année:</label>
+                    <select name="year" class="form-control">
+                        {% for year in available_years %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sélection du mois -->
+                <div class="form-group mx-2">
+                    <label class="mr-2">Mois:</label>
+                    <select name="month" class="form-control">
+                        <option value="">Tous les mois</option>
+                        {% for month_code, month_name in months %}
+                            <option value="{{ month_code }}" {% if month_code == selected_month %}selected{% endif %}>
+                                {{ month_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sélection du bloc -->
+                <div class="form-group mx-2">
+                    <label class="mr-2">Bloc:</label>
+                    <select name="bloc" class="form-control">
+                        <option value="">Tous les blocs</option>
+                        {% for bloc_code, bloc_name in available_blocs %}
+                            <option value="{{ bloc_code }}" {% if bloc_code == selected_bloc %}selected{% endif %}>
+                                {{ bloc_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Filtrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <!-- Total Payé -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Payé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_paid }} DA</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Non Payé -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Non Payé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_unpaid }} DA</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nombre de Payés -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Ont Payé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ paid_count }} personnes</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pourcentage de paiement -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Taux de Paiement</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ payment_percentage|floatformat:1 }}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des paiements -->
+    <div class="row">
+        <!-- Utilisateurs qui ont payé -->
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Paiements Effectués ({{ paid_count }})</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Bloc</th>
+                                    <th>Montant</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in paid_users %}
+                                <tr>
+                                    <td>{{ payment.user.username }}</td>
+                                    <td>{{ payment.user.bloc }}</td>
+                                    <td>{{ payment.amount }} DA</td>
+                                    <td>{{ payment.date }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Utilisateurs qui n'ont pas payé -->
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Paiements Non Effectués ({{ unpaid_count }})</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Bloc</th>
+                                    <th>Mensualité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in unpaid_users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.bloc }}</td>
+                                    <td>{{ user.feecharge }} DA</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

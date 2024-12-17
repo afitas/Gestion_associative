@@ -22,4 +22,6 @@ urlpatterns = [
     path('dashboard/', login_required(views.tenant_dashboard), name='tenant_dashboard'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('month-details/<str:month>/<int:year>/', login_required(views.month_details), name='month_details'),
+    path('filtered-details/', views.filtered_details, name='filtered_details'),
+    path('admin-dashboard-stats/', views.admin_dashboard_stats, name='admin_dashboard_stats'),
 ]

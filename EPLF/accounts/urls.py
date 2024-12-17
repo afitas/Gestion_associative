@@ -18,4 +18,5 @@ urlpatterns = [
     path('edit/<int:uid>/', login_required(views.edit), name="users.edit"),
     path('update/<int:uid>/', login_required(views.update), name="users.update"),
     path('delete/<int:uid>/', login_required(views.delete), name="users.delete"),
+    path('force-password-change/', views.force_password_change, name='force_password_change'),
 ]   

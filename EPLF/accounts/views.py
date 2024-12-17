@@ -4,6 +4,7 @@ from django.contrib import messages
 from accounts.forms import LoginForm, EditProfileForm, ChangePasswordForm
 from . import models
 from . import forms
+from django.contrib.auth.decorators import login_required
 
 # from django.shortcuts import render
 # # accounts/views.py
@@ -51,10 +52,12 @@ def login_view(request):
             if user.is_superuser:
                 return redirect('admin_dashboard')
             else:
-                return redirect('tenant_dashboard')
+                # Vérifier si l'utilisateur (non superuser) doit changer son mot de passe
+                if not user.has_changed_password:
+                    return redirect('force_password_change')
+                return redirect('user_dashboard')
     else:
         form = LoginForm()
-    
     return render(request, 'account/login.html', {'form': form})
 
 
@@ -152,3 +155,24 @@ def delete(request, uid):
     else:
         return redirect('users.list')
 
+
+@login_required
+def force_password_change(request):
+    if request.user.has_changed_password:
+        return redirect('user_dashboard')
+        
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.has_changed_password = True
+            user.save()
+            messages.success(request, 'Votre mot de passe a été changé avec succès.')
+            return redirect('user_dashboard')
+    else:
+        form = ChangePasswordForm(request.user)
+    
+    return render(request, 'account/force_password_change.html', {
+        'form': form,
+        'title': 'Changement de mot de passe obligatoire'
+    })

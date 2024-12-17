@@ -1,0 +1,127 @@
+{% extends "master.html" %}
+
+{% block heading %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Tableau de bord des statistiques de paiement</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Formulaire de filtre -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                {% csrf_token %}
+                <div class="form-group mr-3">
+                    <label class="mr-2">Année :</label>
+                    {{ form.year }}
+                </div>
+                <div class="form-group mr-3">
+                    <label class="mr-2">Mois :</label>
+                    {{ form.month }}
+                </div>
+                <div class="form-group mr-3">
+                    <label class="mr-2">Bloc :</label>
+                    {{ form.bloc }}
+                </div>
+                <button type="submit" class="btn btn-primary">Afficher les statistiques</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Résultats des statistiques -->
+    {% if show_results %}
+    <div class="row">
+        <!-- Abonnés ayant payé -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Abonnés ayant payé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_paid_users }} / {{ total_paid_users|add:total_unpaid_users }}
+                            </div>
+                            <div class="text-xs text-muted mt-1">
+                                Année : {{ selected_year }}, Mois : {{ selected_month }}, Bloc : {{ selected_bloc }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abonnés n'ayant pas payé -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Abonnés n'ayant pas payé</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_unpaid_users }} / {{ total_paid_users|add:total_unpaid_users }}
+                            </div>
+                            <div class="text-xs text-muted mt-1">
+                                Montant total attendu : {{ total_expected_amount|floatformat:2 }} €
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pourcentage de paiement -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pourcentage de paiement</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                        {{ payment_percentage }}%
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                            style="width: {{ payment_percentage }}%" 
+                                            aria-valuenow="{{ payment_percentage }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-muted mt-1">
+                                Montant total payé : {{ total_paid_amount|floatformat:2 }} €
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percent fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Veuillez sélectionner une année, un mois et un bloc pour afficher les statistiques.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -61,3 +61,22 @@ class CreatePlanSubForm(forms.ModelForm):
         if Subscription.objects.filter(year=year, plan=plan).exists():
             raise ValidationError("Un abonnement avec ce plan existe déjà pour cette année.")
         return cleaned_data
+
+class DashboardFilterForm(forms.Form):
+    YEAR_CHOICES = [(r, r) for r in range(1980, datetime.datetime.now().year + 1)]
+    
+    year = forms.ChoiceField(
+        choices=YEAR_CHOICES, 
+        initial=datetime.datetime.now().year,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    month = forms.ChoiceField(
+        choices=[('', 'Tous les mois')] + list(Subscription.PLAN_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    bloc = forms.ChoiceField(
+        choices=[('', 'Tous les blocs')] + list(CustomUser.BLOC_CHOICES),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
