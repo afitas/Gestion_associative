@@ -1,0 +1,215 @@
+{% extends 'master.html' %}
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Tableau de Bord Détaillé - Année {{ selected_year }}</h1>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres de Recherche</h6>
+        </div>
+        <div class="card-body">
+            <form method="GET">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ form.year.label }}</label>
+                            <div class="custom-control">
+                                {{ form.year }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ form.month.label }}</label>
+                            <div class="custom-control">
+                                {{ form.month }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ form.bloc.label }}</label>
+                            <div class="custom-control">
+                                {{ form.bloc }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                {{ form.export }}
+                                <label class="custom-control-label" for="{{ form.export.id_for_label }}">
+                                    {{ form.export.label }}
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">
+                                <i class="fas fa-filter"></i> Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if show_results %}
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Filtres Appliqués (Année)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ selected_year }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Mois Sélectionné</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ selected_month }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Bloc Sélectionné</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ selected_bloc }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Utilisateurs ayant payé</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="paidUsersTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Bloc</th>
+                                    <th>Plan</th>
+                                    <th>Année</th>
+                                    <th>Date de Paiement</th>
+                                    <th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in paid_details %}
+                                <tr>
+                                    <td>{{ detail.user__username }}</td>
+                                    <td>{{ detail.user__bloc }}</td>
+                                    <td>{{ detail.subscription__plan }}</td>
+                                    <td>{{ selected_year }}</td>
+                                    <td>{{ detail.date|date:"d/m/Y" }}</td>
+                                    <td>{{ detail.amount }} Da</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Aucun utilisateur payé trouvé</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Utilisateurs n'ayant pas payé</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="unpaidUsersTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Bloc</th>
+                                    <th>Plan Non Payé</th>
+                                    <th>Année</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in unpaid_details %}
+                                <tr>
+                                    <td>{{ detail.username }}</td>
+                                    <td>{{ detail.bloc }}</td>
+                                    <td>{{ detail.unpaid_months }}</td>
+                                    <td>{{ selected_year }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucun utilisateur impayé trouvé</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    $('#paidUsersTable').DataTable({
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
+        }
+    });
+    $('#unpaidUsersTable').DataTable({
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
+        }
+    });
+});
+</script>
+{% endblock %}

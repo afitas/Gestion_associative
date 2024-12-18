@@ -80,3 +80,68 @@ class DashboardFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False
     )
+    export = forms.BooleanField(
+        label='Exporter en CSV',
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+class AdminDashboardGlobalForm(forms.Form):
+    YEAR_CHOICES = [(r, r) for r in range(1980, datetime.datetime.now().year + 1)]
+    
+    year = forms.ChoiceField(
+        choices=YEAR_CHOICES, 
+        initial=datetime.datetime.now().year,
+        label='Année',
+        widget=forms.Select(attrs={
+            'class': 'form-control custom-select custom-select-sm',
+            'style': 'max-width: 200px;'
+        })
+    )
+
+class AdminDashboardDetailsForm(forms.Form):
+    YEAR_CHOICES = [(r, r) for r in range(1980, datetime.datetime.now().year + 1)]
+    
+    year = forms.ChoiceField(
+        choices=YEAR_CHOICES, 
+        initial=datetime.datetime.now().year,
+        label='Année',
+        widget=forms.Select(attrs={
+            'class': 'form-control custom-select custom-select-sm',
+            'style': 'max-width: 200px;'
+        })
+    )
+    month = forms.ChoiceField(
+        label='Mois',
+        choices=[('', 'Tous les mois')] + list(Subscription.PLAN_CHOICES),
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control custom-select custom-select-sm',
+            'style': 'max-width: 200px;'
+        })
+    )
+    bloc = forms.ChoiceField(
+        label='Bloc',
+        choices=[('', 'Tous les blocs')] + list(CustomUser.BLOC_CHOICES),
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control custom-select custom-select-sm',
+            'style': 'max-width: 200px;'
+        })
+    )
+    export = forms.BooleanField(
+        label='Exporter en CSV',
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'custom-control-input',
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name != 'export':
+                field.widget.attrs.update({
+                    'class': 'form-control custom-select custom-select-sm',
+                    'style': 'max-width: 200px;'
+                })

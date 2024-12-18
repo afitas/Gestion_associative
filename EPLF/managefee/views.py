@@ -4,10 +4,12 @@ from django.shortcuts import render, redirect
 from .models import Subscription, CustomUser, Fee
 from managefee.forms import CreateEnrollForm, CreatePlanSubForm
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F, Q
 from django.db.models.functions import TruncMonth
 import datetime
 from .forms import DashboardFilterForm
+from .forms import AdminDashboardGlobalForm, AdminDashboardDetailsForm
+import csv
 # Create your views here.
 
 
@@ -406,70 +408,215 @@ def filtered_details(request):
     return render(request, 'managefee/filtered_details.html', context)
 
 
+
 @login_required
 def admin_dashboard_stats(request):
-    # Vérifier si l'utilisateur est un administrateur
     if not request.user.is_superuser:
         messages.error(request, "Vous n'avez pas l'autorisation d'accéder à cette page.")
         return redirect('tenant_dashboard')
-    
+
     form = DashboardFilterForm(request.GET or None)
-    context = {
-        'form': form,
-        'show_results': False
-    }
-    
+    context = {'form': form, 'show_results': False}
+
     if request.GET and form.is_valid():
-        # Récupérer les données du formulaire
+        # Récupération des filtres
         selected_year = form.cleaned_data['year']
-        selected_month = form.cleaned_data['month']
-        selected_bloc = form.cleaned_data['bloc']
-        
-        # Requête de base pour tous les utilisateurs non superadmin
+        selected_month = form.cleaned_data.get('month', '')
+        selected_bloc = form.cleaned_data.get('bloc', '')
+        export_csv = form.cleaned_data.get('export', False)
+
+        # Requête de base pour les utilisateurs non-superadmin
         users_query = CustomUser.objects.filter(is_superuser=False)
-        
-        # Appliquer les filtres de bloc si sélectionné
         if selected_bloc:
             users_query = users_query.filter(bloc=selected_bloc)
-        
-        # Total attendu d'abonnés
+
         total_expected = users_query.count()
-        
-        # Préparer la requête de base pour les paiements
+
+        # Récupérer les paiements filtrés
         fees_query = Fee.objects.filter(
             subscription__year=selected_year,
-            user__is_superuser=False
+            user__in=users_query
         )
-        
-        # Appliquer le filtre de mois si sélectionné
         if selected_month:
             fees_query = fees_query.filter(subscription__plan=selected_month)
-        
-        # Appliquer le filtre de bloc
-        if selected_bloc:
-            fees_query = fees_query.filter(user__bloc=selected_bloc)
-        
-        # Obtenir les utilisateurs ayant payé
-        paid_users = fees_query.values('user').distinct().count()
-        
-        # Calculer les statistiques
-        total_paid = fees_query.aggregate(total=Sum('amount'))['total'] or 0
-        total_expected_amount = users_query.aggregate(total=Sum('feecharge'))['total'] or 0
-        
-        # Calculer le pourcentage de paiement
-        payment_percentage = (paid_users / total_expected * 100) if total_expected > 0 else 0
-        
-        # Préparer les résultats
+
+        # Utilisateurs ayant payé
+        paid_users = fees_query.values(
+            'user__username', 'user__bloc', 'date', 'amount'
+        ).order_by('date')
+
+        # Utilisateurs n'ayant pas payé avec les mois non payés
+        paid_user_ids = fees_query.values_list('user_id', flat=True).distinct()
+        unpaid_users = users_query.exclude(id__in=paid_user_ids)
+
+        unpaid_details = []
+        for user in unpaid_users:
+            paid_months = fees_query.filter(user=user).values_list('subscription__plan', flat=True)
+            unpaid_months = [month[1] for month in Subscription.PLAN_CHOICES if month[0] not in paid_months]
+
+            unpaid_details.append({
+                'username': user.username,
+                'bloc': user.bloc,
+                'unpaid_months': ', '.join(unpaid_months)
+            })
+
+        # Statistiques globales
+        paid_count = len(set(paid_users.values_list('user__username', flat=True)))
+        unpaid_count = total_expected - paid_count
+        payment_percentage = (paid_count / total_expected * 100) if total_expected > 0 else 0
+
+        # Export CSV
+        if export_csv:
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="admin_dashboard_stats.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['Nom', 'Bloc', 'Mois Non Payés'])
+            for user in unpaid_details:
+                writer.writerow([user['username'], user['bloc'], user['unpaid_months']])
+            return response
+
+        # Mettre à jour le contexte avec les nouvelles données
         context.update({
             'show_results': True,
-            'total_paid_users': paid_users,
-            'total_unpaid_users': total_expected - paid_users,
+            'total_paid_users': paid_count,
+            'total_unpaid_users': unpaid_count,
             'payment_percentage': round(payment_percentage, 2),
-            'total_paid_amount': total_paid,
-            'total_expected_amount': total_expected_amount,
+            'paid_users': paid_users,
+            'unpaid_details': unpaid_details,
             'selected_year': selected_year,
             'selected_month': selected_month or 'Tous',
-            'selected_bloc': selected_bloc or 'Tous'
+            'selected_bloc': selected_bloc or 'Tous',
+            'total_expected': total_expected
         })
-    
+
     return render(request, 'managefee/admin_dashboard_stats.html', context)
+
+
+@login_required
+def admin_dashboard_global(request):
+    if not request.user.is_superuser:
+        messages.error(request, "Vous n'avez pas l'autorisation d'accéder à cette page.")
+        return redirect('tenant_dashboard')
+
+    form = AdminDashboardGlobalForm(request.GET or None)
+    context = {'form': form, 'show_results': False}
+
+    if request.GET and form.is_valid():
+        selected_year = form.cleaned_data['year']
+        
+        # Requête de base pour les utilisateurs non-superadmin
+        users_query = CustomUser.objects.filter(is_superuser=False)
+        total_expected = users_query.count()
+
+        # Récupérer les paiements pour l'année sélectionnée
+        fees_query = Fee.objects.filter(
+            subscription__year=selected_year,
+            user__in=users_query
+        )
+
+        # Statistiques globales
+        paid_users = fees_query.values('user').distinct().count()
+        unpaid_users = total_expected - paid_users
+        payment_percentage = (paid_users / total_expected * 100) if total_expected > 0 else 0
+
+        # Mettre à jour le contexte
+        context.update({
+            'show_results': True,
+            'total_expected': total_expected,
+            'paid_users': paid_users,
+            'unpaid_users': unpaid_users,
+            'payment_percentage': round(payment_percentage, 2),
+            'selected_year': selected_year
+        })
+
+    return render(request, 'managefee/admin_dashboard_global.html', context)
+
+@login_required
+def admin_dashboard_details(request, selected_year):
+    if not request.user.is_superuser:
+        messages.error(request, "Vous n'avez pas l'autorisation d'accéder à cette page.")
+        return redirect('tenant_dashboard')
+
+    initial_data = {'year': selected_year}
+    form = AdminDashboardDetailsForm(request.GET or None, initial=initial_data)
+    context = {'form': form, 'show_results': False, 'selected_year': selected_year}
+
+    if request.GET and form.is_valid():
+        selected_month = form.cleaned_data.get('month')
+        selected_bloc = form.cleaned_data.get('bloc')
+        export_csv = form.cleaned_data.get('export', False)
+
+        # Requête de base pour les utilisateurs
+        users_query = CustomUser.objects.filter(is_superuser=False)
+        if selected_bloc:
+            users_query = users_query.filter(bloc=selected_bloc)
+
+        # Requête de base pour les paiements
+        fees_query = Fee.objects.filter(
+            subscription__year=selected_year,
+            user__in=users_query
+        )
+        if selected_month:
+            fees_query = fees_query.filter(subscription__plan=selected_month)
+
+        # Utilisateurs ayant payé pour le mois spécifique
+        paid_users = fees_query.select_related('user', 'subscription')
+        
+        # Utilisateurs n'ayant pas payé pour le mois spécifique
+        paid_user_ids = paid_users.values_list('user_id', flat=True).distinct()
+        unpaid_users = users_query.exclude(id__in=paid_user_ids)
+
+        # Préparation des détails
+        paid_details = paid_users.values(
+            'user__username', 'user__bloc', 'subscription__plan', 
+            'date', 'amount'
+        ).order_by('date')
+
+        unpaid_details = []
+        for user in unpaid_users:
+            # Si un mois est sélectionné, n'inclure que les utilisateurs 
+            # qui n'ont pas payé ce mois spécifique
+            if selected_month:
+                unpaid_details.append({
+                    'username': user.username,
+                    'bloc': user.bloc,
+                    'unpaid_months': selected_month
+                })
+            else:
+                # Si aucun mois n'est sélectionné, trouver tous les mois non payés
+                paid_months = set(Fee.objects.filter(
+                    user=user, 
+                    subscription__year=selected_year
+                ).values_list('subscription__plan', flat=True))
+                
+                unpaid_months = [month[1] for month in Subscription.PLAN_CHOICES if month[0] not in paid_months]
+
+                unpaid_details.append({
+                    'username': user.username,
+                    'bloc': user.bloc,
+                    'unpaid_months': ', '.join(unpaid_months)
+                })
+        # Calculer le montant total des mensualités impayées
+        unpaid_total_amount = unpaid_users.aggregate(total=Sum('feecharge'))['total'] or 0
+        # Export CSV si demandé
+        if export_csv:
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="admin_dashboard_details.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['Nom', 'Bloc', 'Mois Non Payés'])
+            for user in unpaid_details:
+                writer.writerow([user['username'], user['bloc'], user['unpaid_months']])
+            return response
+
+        # Mettre à jour le contexte
+        context.update({
+            'show_results': True,
+            'paid_details': paid_details,
+            'unpaid_details': unpaid_details,
+            'selected_month': selected_month or 'Tous',
+            'selected_bloc': selected_bloc or 'Tous',
+             'unpaid_total_amount': unpaid_total_amount
+        })
+
+    return render(request, 'managefee/admin_dashboard_details.html', context)
+

@@ -1,127 +1,237 @@
 {% extends "master.html" %}
 
 {% block heading %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Tableau de bord des statistiques de paiement</h1>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-bar mr-2"></i>Tableau de bord des statistiques de paiement
+        </h1>
+    </div>
 </div>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Formulaire de filtre -->
+    <!-- Filtre Section -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-2"></i>Filtres de recherche
+            </h6>
         </div>
         <div class="card-body">
-            <form method="get" class="form-inline">
+            <form method="get" class="row g-3 align-items-end">
                 {% csrf_token %}
-                <div class="form-group mr-3">
-                    <label class="mr-2">Année :</label>
+                <div class="col-md-3">
+                    <label class="form-label">Année</label>
                     {{ form.year }}
                 </div>
-                <div class="form-group mr-3">
-                    <label class="mr-2">Mois :</label>
+                <div class="col-md-3">
+                    <label class="form-label">Mois</label>
                     {{ form.month }}
                 </div>
-                <div class="form-group mr-3">
-                    <label class="mr-2">Bloc :</label>
+                <div class="col-md-3">
+                    <label class="form-label">Bloc</label>
                     {{ form.bloc }}
                 </div>
-                <button type="submit" class="btn btn-primary">Afficher les statistiques</button>
+                <div class="col-md-3">
+                    <div class="form-check">
+                        {{ form.export }}
+                        <label class="form-check-label" for="{{ form.export.id_for_label }}">
+                            Exporter en CSV
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">
+                        <i class="fas fa-search mr-2"></i>Rechercher
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Résultats des statistiques -->
+    <!-- Résultats Statistiques -->
     {% if show_results %}
     <div class="row">
-        <!-- Abonnés ayant payé -->
+        <!-- Carte Abonnés Payés -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Abonnés ayant payé</div>
+                                Abonnés Payés
+                            </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ total_paid_users }} / {{ total_paid_users|add:total_unpaid_users }}
+                                {{ total_paid_users }} / {{ total_expected }}
                             </div>
                             <div class="text-xs text-muted mt-1">
-                                Année : {{ selected_year }}, Mois : {{ selected_month }}, Bloc : {{ selected_bloc }}
+                                Période : {{ selected_year }} - {{ selected_month }} - {{ selected_bloc }}
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-check fa-2x text-success"></i>
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Abonnés n'ayant pas payé -->
+        <!-- Carte Abonnés Impayés -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Abonnés n'ayant pas payé</div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Abonnés Impayés
+                            </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ total_unpaid_users }} / {{ total_paid_users|add:total_unpaid_users }}
+                                {{ total_unpaid_users }} / {{ total_expected }}
                             </div>
                             <div class="text-xs text-muted mt-1">
-                                Montant total attendu : {{ total_expected_amount|floatformat:2 }} €
+                                Montant total attendu : 
+                                {% with total_unpaid_amount=unpaid_users.aggregate.total %}
+                                    {{ total_unpaid_amount|default:0|floatformat:2 }} €
+                                {% endwith %}
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pourcentage de paiement -->
+        <!-- Carte Pourcentage de Paiement -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Pourcentage de paiement</div>
+                                Taux de Paiement
+                            </div>
                             <div class="row no-gutters align-items-center">
                                 <div class="col-auto">
                                     <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                                        {{ payment_percentage }}%
+                                        {{ payment_percentage|floatformat:1 }}%
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="progress progress-sm mr-2">
+                                    <div class="progress">
                                         <div class="progress-bar bg-info" role="progressbar" 
-                                            style="width: {{ payment_percentage }}%" 
-                                            aria-valuenow="{{ payment_percentage }}" 
-                                            aria-valuemin="0" 
-                                            aria-valuemax="100"></div>
+                                             style="width: {{ payment_percentage }}%" 
+                                             aria-valuenow="{{ payment_percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="text-xs text-muted mt-1">
-                                Montant total payé : {{ total_paid_amount|floatformat:2 }} €
-                            </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-percent fa-2x text-info"></i>
+                            <i class="fas fa-percentage fa-2x text-info"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="alert alert-info" role="alert">
-        Veuillez sélectionner une année, un mois et un bloc pour afficher les statistiques.
+
+    <!-- Détails des Paiements -->
+    <div class="row">
+        <!-- Tableau Utilisateurs Payés -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        Utilisateurs Payés ({{ total_paid_users }} / {{ total_expected }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Bloc</th>
+                                <th>Date</th>
+                                <th>Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in paid_users %}
+                            <tr>
+                                <td>{{ user.user__username }}</td>
+                                <td>{{ user.user__bloc }}</td>
+                                <td>{{ user.date|date:"d/m/Y" }}</td>
+                                <td>{{ user.amount }} €</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Aucun utilisateur n'a payé.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tableau Utilisateurs Impayés -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-danger">
+                        <i class="fas fa-user-times mr-2"></i>Utilisateurs Impayés 
+                        ({{ total_unpaid_users }} / {{ total_expected }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Bloc</th>
+                                    <th>Mois Non Payés</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in unpaid_details %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.bloc }}</td>
+                                    <td>{{ user.unpaid_months }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        <i class="fas fa-info-circle mr-2"></i>Tous les utilisateurs ont payé
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#paidUsersTable, #unpaidUsersTable').DataTable({
+            "pageLength": 10,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+    });
+</script>
 {% endblock %}
