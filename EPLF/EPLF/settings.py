@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "tempus_dominus",
     "accounts",
     "managefee",
-    
+    "announcements", 
 ]
 
 MIDDLEWARE = [

@@ -170,6 +170,26 @@
                     </li>
                 {% endif %}
             {% endif %}
+
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <!-- Menu pour le superadmin -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'announcement-list' %}">
+                            <i class="fas fa-fw fa-bullhorn"></i>
+                            <span>Gestion des annonces</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <!-- Menu pour les souscripteurs -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'announcement-list' %}">
+                            <i class="fas fa-fw fa-bell"></i>
+                            <span>Annonces</span>
+                        </a>
+                    </li>
+                {% endif %}
+            {% endif %}
         </ul>
         <!-- End of Sidebar -->
 

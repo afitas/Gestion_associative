@@ -1,0 +1,38 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ announcement.title }}</h1>
+        <a href="{% url 'announcement-list' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Retour aux annonces
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Publié le {{ announcement.created_at|date:"d/m/Y à H:i" }} par {{ announcement.created_by }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {{ announcement.content|linebreaks }}
+                </div>
+                {% if user.is_superuser %}
+                <div class="card-footer">
+                    <a href="{% url 'announcement-update' announcement.pk %}" class="btn btn-info btn-sm">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'announcement-delete' announcement.pk %}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
